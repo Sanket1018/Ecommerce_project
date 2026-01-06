@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{base::layout(~{::section})}">
+<head>
+    <meta charset="UTF-8">
+    <title>Category Management</title>
+</head>
+<body>
+<section>
+    <div class="container-fluid p-5 mt-5">
+        <div class="row">
+            <!-- Add Category Form -->
+            <div class="col-md-3">
+                <div class="card card-sh">
+                    <div class="card-header text-center">
+                        <p class="fs-4">Add Category</p>
+                        <!-- Success Message -->
+                        <th:block th:if="${session.succMsg}">
+                            <p class="text-success fw-bold">[[${session.succMsg}]]</p>
+                        </th:block>
+
+<!--                        &lt;!&ndash; Error Message &ndash;&gt;-->
+<!--                        <th:block th:if="${session.errorMsg}">-->
+<!--                            <p class="text-danger fw-bold">[[${session.errorMsg}]]</p>-->
+<!--                        </th:block>-->
+
+
+                    </div>
+                    <div class="card-body">
+                        <form action="/admin/saveCategory" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label>Enter Category</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Status</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" value="true" name="isActive" id="flexRadioDefault1" checked>
+                                    <label class="form-check-label" for="flexRadioDefault1">Active</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" value="false" name="isActive" id="flexRadioDefault2">
+                                    <label class="form-check-label" for="flexRadioDefault2">Inactive</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Upload Image</label>
+                                <input type="file" name="file" class="form-control">
+                            </div>
+
+                            <button class="btn btn-primary col-md-12 mt-2">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category List Table -->
+            <div class="col-md-8">
+                <div class="card card-sh">
+                    <div class="card-header text-center fs-4">Category Details</div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Sl No</th>
+                                <th scope="col">Category</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Image</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cat,iterStat : ${categorys}">
+                                <th scope="row">[[${iterStat.count}]]</th>
+                                <td>[[${cat.name}]]</td>
+                                <td>
+                                    <span th:text="${cat.isActive} ? 'Active' : 'Inactive'"></span>
+                                </td>
+                                <td>
+                                    <img th:src="@{'/img/category_img/' + ${cat.imageName}}" width="50" height="50" alt="Category Image">
+                                </td>
+                                <td>
+                                    <a th:href="@{'/admin/loadEditCategory/' + ${cat.id}}" class="btn btn-primary btn-sm">
+                                        <i class="fa-solid fa-pen-to-square fa-1x"></i> Edit
+                                    </a>
+                                    <a th:href="@{'/admin/deleteCategory/' + ${cat.id}}" class="btn btn-danger btn-sm">
+                                        <i class="fa-solid fa-trash fa-1x"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            <!-- Optional: show message if no categories -->
+                            <tr th:if="${#lists.isEmpty(categorys)}">
+                                <td colspan="5" class="text-center">No categories found.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+</body>
+</html>
