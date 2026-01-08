@@ -7,15 +7,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import com.fasterxml.jackson.databind.ObjectReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ecom.model.Category;
@@ -36,7 +34,8 @@ public class AdminController {
 	}
 
     @GetMapping("/category")
-    public String category() {
+    public String category(Model m) {
+        m.addAttribute("categorys",categoryService.getAllCategory());
         return "admin/category";
     }
 
@@ -74,14 +73,72 @@ public class AdminController {
 
         }
 		return "redirect:/admin/category";
-
-
-
-
-
-
 	}
 
+    // Delete category by id
+    @GetMapping("/deleteCategory/{id}")
+    public String deleteCategoryById(@PathVariable int id,HttpSession session)
+    {
+        Boolean deleteCategory = categoryService.deleteCategoryById(id);
+
+        if(deleteCategory)
+        {
+            session.setAttribute("succMsg","Category deleted successfully");
+        }
+        else{
+            session.setAttribute("errorMsg","Something wrong on server");
+        }
+
+        return "redirect:/admin/category";
+    }
+
+    // Edit category
+
+    ///  first we have to load the add category page
+    @GetMapping("/loadEditCategory/{id}")
+    public String loadEditCategory(@PathVariable int id,Model m)
+    {
+        m.addAttribute("category",categoryService.getCategoryById(id));
+        return "admin/edit_category";
+    }
+
+    ///  Now we have to update
+    @PostMapping("/updateCategory")
+    public String updateCategory(@ModelAttribute Category category,@RequestParam("file") MultipartFile file,HttpSession session) throws IOException {
+
+        Category oldCategory = categoryService.getCategoryById(category.getId());
+
+        // If user not uploaded image to update then we have to check this
+        String fileName = file.isEmpty() ? oldCategory.getImageName() : file.getOriginalFilename();
+
+
+        if(!ObjectUtils.isEmpty(oldCategory))
+        {
+            oldCategory.setName(category.getName());
+            oldCategory.setIsActive(category.getIsActive());
+            oldCategory.setImageName(fileName);
+        }
+        // Now we have to save
+        Category updatedcategory = categoryService.saveCategory(oldCategory);
+
+        if(!ObjectUtils.isEmpty(updatedcategory))
+        {
+            if(!file.isEmpty())
+            {
+                File saveFile = new ClassPathResource("static/img").getFile();
+                Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+"category_img"+File.separator+file.getOriginalFilename());
+                System.out.println(path);
+
+                Files.copy(file.getInputStream(),path,StandardCopyOption.REPLACE_EXISTING);
+            }
+            session.setAttribute("succMsg","Category Updated successfully");
+        }
+        else{
+            session.setAttribute("errorMsg","something wrong on server");
+        }
+
+        return "redirect:/admin/loadEditCategory/"+category.getId();
+    }
 
 
 }
