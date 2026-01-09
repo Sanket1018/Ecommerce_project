@@ -6,7 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
+import com.ecom.model.Product;
+import com.ecom.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -27,6 +30,9 @@ public class AdminController {
 
 	@Autowired
 	private CategoryService categoryService;
+
+    @Autowired
+    private ProductService productService;
 
 	@GetMapping("/")
 	public String index() {
@@ -139,6 +145,56 @@ public class AdminController {
 
         return "redirect:/admin/loadEditCategory/"+category.getId();
     }
+
+
+
+
+//    ************************************************************************************************************************
+    // Product ------------------------------------------------------------
+    // If we want to show on url then we are going to use Model
+
+
+    @GetMapping("/loadAddProduct")
+    public String loadAddProduct(Model m)
+    {
+        // We want to show the all categories on the add product page
+        List<Category> categories= categoryService.getAllCategory();
+        m.addAttribute("categories",categories);
+        // We display this categories on the UI using for each of thymleaf
+        return "admin/add_product";
+    }
+
+    @PostMapping("/saveProduct")
+    public String saveProduct(@ModelAttribute  Product product,HttpSession session,@RequestParam("file") MultipartFile image) throws IOException {
+        // check user is giving the file or not if not then we give default name to it
+        String imageName = image.isEmpty()?"default.jpg":image.getOriginalFilename();
+        product.setImage(imageName);
+
+
+        Product saveProduct = productService.saveProduct(product);
+
+        // checks the object of the produc is present or not
+        if(!ObjectUtils.isEmpty(saveProduct))
+        {
+            // apana same logic to save the image to folder
+            File saveFile = new ClassPathResource("static/img").getFile();
+            Path path = Paths.get(saveFile.getAbsolutePath()+File.separator+"product_img"+File.separator+image.getOriginalFilename());
+            System.out.println(path);
+
+            Files.copy(image.getInputStream(),path,StandardCopyOption.REPLACE_EXISTING);
+
+
+            session.setAttribute("succMsg","Product saved successfully");
+        }
+        else{
+            session.setAttribute("errorMsg","Something wrong on server");
+        }
+        // Now also get a image in add product so we have to get it
+
+        // below line says when save the product redirect to the loadAddProduct
+        return "redirect:/admin/loadAddProduct";
+    }
+
 
 
 }
