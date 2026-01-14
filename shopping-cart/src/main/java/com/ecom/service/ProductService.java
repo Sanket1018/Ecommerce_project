@@ -3,6 +3,7 @@ package com.ecom.service;
 import com.ecom.model.Product;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface ProductService {
@@ -15,5 +16,5 @@ public interface ProductService {
 
     public Product getProductById(Integer id);
 
-    public Product updateProduct(Product product, MultipartFile file);
+    public Product updateProduct(Product product, MultipartFile file) throws IOException;
 }

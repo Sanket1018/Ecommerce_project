@@ -164,18 +164,20 @@ public class AdminController {
         return "admin/add_product";
     }
 
-//    ========================================================================================================================
-// Save
+//    =======================================================================================================================
+
     @PostMapping("/saveProduct")
     public String saveProduct(@ModelAttribute  Product product,HttpSession session,@RequestParam("file") MultipartFile image) throws IOException {
         // check user is giving the file or not if not then we give default name to it
         String imageName = image.isEmpty()?"default.jpg":image.getOriginalFilename();
         product.setImage(imageName);
-
+        // At the time of adding product set the price discount to 0
+        product.setDiscount(0);
+        product.setDiscountPrice(product.getPrice());
 
         Product saveProduct = productService.saveProduct(product);
 
-        // checks the object of the produc is present or not
+        // checks the object of the product is present or not
         if(!ObjectUtils.isEmpty(saveProduct))
         {
             // apana same logic to save the image to folder
@@ -231,16 +233,29 @@ public class AdminController {
         m.addAttribute("product",productService.getProductById(id));
         m.addAttribute("categories",categoryService.getAllCategory());
         return "admin/edit_product";
-
     }
 
     //updateProduct
-    @PostMapping("/updateProduct/{id}")
-    public String editProduct(@PathVariable int id,@ModelAttribute Product product, Model m,HttpSession session,@RequestParam("file") MultipartFile image)
-    {
-        return "admin/edit_product";
+    @PostMapping("/updateProduct")
+    public String editProduct(@ModelAttribute Product product, Model m,HttpSession session,@RequestParam("file") MultipartFile image) throws IOException {
 
+
+        // check for the discount percentage is between 0 to 100
+        if(product.getDiscount() < 0 || product.getDiscount() >100)
+        {
+            session.setAttribute("errorMsg","Invalid discount");
+        }
+        else{
+            Product updateProduct = productService.updateProduct(product,image);
+            // checking object is empty or not
+            if(!ObjectUtils.isEmpty(updateProduct))
+            {
+                session.setAttribute("succMsg","Product updated successfully");
+            }
+            else {
+                session.setAttribute("errorMsg", "something went wrong on server");
+            }
+        }
+        return "redirect:/admin/editProduct/"+product.getId();
     }
-
-
 }
