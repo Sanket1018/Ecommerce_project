@@ -164,6 +164,8 @@ public class AdminController {
         return "admin/add_product";
     }
 
+//    ========================================================================================================================
+// Save
     @PostMapping("/saveProduct")
     public String saveProduct(@ModelAttribute  Product product,HttpSession session,@RequestParam("file") MultipartFile image) throws IOException {
         // check user is giving the file or not if not then we give default name to it
@@ -195,6 +197,50 @@ public class AdminController {
         return "redirect:/admin/loadAddProduct";
     }
 
+//===============================================================================================================================================================
+    // Product
+
+
+    // Product - view product
+    @GetMapping("/products")
+    public String loadViewProduct(Model m )
+    {
+       m.addAttribute("products",productService.getAllProducts());
+        return "admin/products";
+    }
+
+    // Delete product
+    @GetMapping("/deleteProduct/{id}")
+    public String deleteProduct(@PathVariable int id,HttpSession session)
+    {
+        Boolean deleteProduct = productService.deleteProduct(id);
+        if(deleteProduct)
+        {
+            session.setAttribute("succMsg","Product deleted successfully");
+        }
+        else{
+            session.setAttribute("errorMsg","Something went wrong");
+        }
+        return "redirect:/admin/products";
+    }
+
+    // Edit product
+    @GetMapping("/editProduct/{id}")
+    public String editProduct(@PathVariable int id,Model m)
+    {
+        m.addAttribute("product",productService.getProductById(id));
+        m.addAttribute("categories",categoryService.getAllCategory());
+        return "admin/edit_product";
+
+    }
+
+    //updateProduct
+    @PostMapping("/updateProduct/{id}")
+    public String editProduct(@PathVariable int id,@ModelAttribute Product product, Model m,HttpSession session,@RequestParam("file") MultipartFile image)
+    {
+        return "admin/edit_product";
+
+    }
 
 
 }
