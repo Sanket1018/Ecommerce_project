@@ -70,6 +70,7 @@ public class ProductServiceImpl implements ProductService {
         dbProduct.setPrice(product.getPrice());
         dbProduct.setStock(product.getStock());
         dbProduct.setDiscount(product.getDiscount());
+        dbProduct.setIsActive(product.getIsActive());
 
 
         // Here we can the write the logic to calculate discount
@@ -98,5 +99,11 @@ public class ProductServiceImpl implements ProductService {
             return product;
         }
         return  dbProduct;
+    }
+
+    @Override
+    public List<Product> getAllActiveProducts() {
+        List<Product> products = productRepository.findByIsActiveTrue();
+        return products;
     }
 }
