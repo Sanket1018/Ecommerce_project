@@ -28,13 +28,10 @@ public class CategoryServiceImpl implements CategoryService {
 		return categoryRepository.existsByName(name);
 	}
 
-
-
 	@Override
 	public List<Category> getAllCategory() {
 		return categoryRepository.findAll();
 	}
-
 
     // Delete category
     @Override

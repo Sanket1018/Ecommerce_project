@@ -10,7 +10,6 @@ import java.util.List;
 
 import com.ecom.model.Product;
 import com.ecom.service.ProductService;
-import com.fasterxml.jackson.databind.ObjectReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Controller;
